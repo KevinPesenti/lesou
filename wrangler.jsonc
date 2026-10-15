@@ -1,0 +1,16 @@
+{
+  // Configuration Cloudflare Workers (site statique servi comme « assets »).
+  // Le nom doit correspondre au Worker créé dans le tableau de bord Cloudflare.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lesou",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    // Sert dist/404.html pour les adresses inconnues
+    "not_found_handling": "404-page"
+  },
+  "vars": {
+    "PUBLIC_SANITY_PROJECT_ID": "4lcj5kde",
+    "PUBLIC_SANITY_DATASET": "production"
+  }
+}
