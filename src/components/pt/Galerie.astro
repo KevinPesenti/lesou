@@ -1,0 +1,117 @@
+---
+/**
+ * Bloc « Galerie photos » du texte riche : mosaïque de vignettes, et une
+ * visionneuse plein écran au clic (flèches, Échap, clic en dehors).
+ */
+import type { Props as PtProps } from 'astro-portabletext/types';
+import { urlFor } from '../../lib/sanity';
+type Photo = { _key: string; asset?: { _id: string; metadata?: { dimensions?: { width: number; height: number } } }; alt?: string; legende?: string };
+interface Galerie { _type: 'galerie'; _key: string; titre?: string; images?: Photo[] }
+const { node } = Astro.props as PtProps<Galerie>;
+const photos = (node.images ?? []).filter((p) => p.asset);
+---
+{photos.length > 0 && (
+  <figure class="galerie" data-galerie>
+    {node.titre && <figcaption class="galerie__titre">{node.titre}</figcaption>}
+    <ul class="galerie__grille">
+      {photos.map((p, i) => (
+        <li>
+          <button
+            type="button"
+            class="galerie__vignette"
+            data-index={i}
+            data-grande={urlFor(p).width(1800).fit('max').url()}
+            data-legende={p.legende ?? ''}
+            aria-label={`Agrandir la photo ${i + 1} sur ${photos.length}${p.legende ? ` : ${p.legende}` : ''}`}
+          >
+            <img src={urlFor(p).width(640).height(640).fit('crop').url()} alt={p.alt ?? ''} width="640" height="640" loading="lazy" decoding="async" />
+          </button>
+        </li>
+      ))}
+    </ul>
+    <dialog class="visionneuse" aria-label="Photo agrandie">
+      <button type="button" class="visionneuse__fermer" data-fermer aria-label="Fermer">×</button>
+      <button type="button" class="visionneuse__fleche visionneuse__fleche--prec" data-prec aria-label="Photo précédente">‹</button>
+      <figure class="visionneuse__cadre">
+        <img class="visionneuse__image" src="" alt="" />
+        <figcaption class="visionneuse__legende"></figcaption>
+      </figure>
+      <button type="button" class="visionneuse__fleche visionneuse__fleche--suiv" data-suiv aria-label="Photo suivante">›</button>
+    </dialog>
+  </figure>
+)}
+
+<script>
+  for (const galerie of document.querySelectorAll<HTMLElement>('[data-galerie]')) {
+    const vignettes = [...galerie.querySelectorAll<HTMLButtonElement>('.galerie__vignette')];
+    const dialog = galerie.querySelector<HTMLDialogElement>('.visionneuse');
+    const img = galerie.querySelector<HTMLImageElement>('.visionneuse__image');
+    const legende = galerie.querySelector<HTMLElement>('.visionneuse__legende');
+    if (!dialog || !img || !legende) continue;
+    let courant = 0;
+    const montrer = (i: number) => {
+      courant = (i + vignettes.length) % vignettes.length;
+      const v = vignettes[courant];
+      img.src = v.dataset.grande ?? '';
+      img.alt = v.querySelector('img')?.alt ?? '';
+      legende.textContent = v.dataset.legende ?? '';
+      legende.hidden = !legende.textContent;
+    };
+    vignettes.forEach((v, i) => v.addEventListener('click', () => { montrer(i); dialog.showModal(); }));
+    galerie.querySelector('[data-fermer]')?.addEventListener('click', () => dialog.close());
+    galerie.querySelector('[data-prec]')?.addEventListener('click', () => montrer(courant - 1));
+    galerie.querySelector('[data-suiv]')?.addEventListener('click', () => montrer(courant + 1));
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') montrer(courant - 1);
+      if (e.key === 'ArrowRight') montrer(courant + 1);
+    });
+    dialog.addEventListener('close', () => { img.src = ''; vignettes[courant]?.focus(); });
+  }
+</script>
+
+<style>
+  .galerie { margin: 2em 0; }
+  .galerie__titre { font-family: var(--titre-police); font-variation-settings: 'wght' 600; font-size: 1.3rem; margin-bottom: 0.8rem; color: var(--encre); }
+  .galerie__grille {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 0.6rem;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  }
+  .galerie__grille li { margin: 0; padding: 0; }
+  .galerie__grille li::before { display: none; }
+  .galerie__vignette {
+    display: block; width: 100%; aspect-ratio: 1; padding: 0; border: 0; cursor: zoom-in;
+    border-radius: var(--rayon-petit); overflow: hidden; background: var(--papier-2);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .galerie__vignette:hover { transform: rotate(-1.5deg) scale(1.03); box-shadow: 0 12px 24px -12px rgba(36, 48, 44, 0.5); }
+  .galerie__vignette:focus-visible { outline: 3px solid var(--jaune); outline-offset: 2px; }
+  .galerie__vignette img { width: 100%; height: 100%; object-fit: cover; margin: 0; border-radius: 0; }
+
+  /* Le dialogue occupe tout l'écran et porte lui-même le fond sombre (plus fiable que ::backdrop) */
+  .visionneuse {
+    position: fixed; inset: 0; margin: 0; border: 0;
+    width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh;
+    padding: 1rem clamp(0.5rem, 3vw, 2rem);
+    background: rgba(31, 55, 48, 0.97); color: var(--craie);
+    display: none; grid-template-columns: 3rem minmax(0, 1fr) 3rem; align-items: center; gap: 0.5rem;
+  }
+  .visionneuse[open] { display: grid; }
+  .visionneuse__cadre { margin: 0; display: grid; justify-items: center; gap: 0.6rem; min-width: 0; }
+  .visionneuse__image { width: auto; max-width: 100%; max-height: 82vh; object-fit: contain; border-radius: var(--rayon-petit); justify-self: center; }
+  .visionneuse__legende { font-family: var(--craie-police); font-weight: 600; font-size: 1.3rem; text-align: center; }
+  .visionneuse__fleche, .visionneuse__fermer {
+    border: 0; background: rgba(255, 255, 255, 0.12); color: var(--craie); cursor: pointer;
+    border-radius: 50%; width: 2.8rem; height: 2.8rem; font-size: 2rem; line-height: 1;
+    display: grid; place-items: center;
+  }
+  .visionneuse__fleche:hover, .visionneuse__fermer:hover { background: rgba(255, 255, 255, 0.25); }
+  .visionneuse__fermer { position: fixed; top: 1rem; right: 1rem; font-size: 1.8rem; }
+  @media (max-width: 40em) {
+    .visionneuse { grid-template-columns: 1fr; }
+    .visionneuse__fleche { position: fixed; bottom: 1.2rem; }
+    .visionneuse__fleche--prec { left: 1.2rem; }
+    .visionneuse__fleche--suiv { right: 1.2rem; }
+  }
+</style>

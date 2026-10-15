@@ -1,0 +1,104 @@
+---
+/**
+ * Page Nous contacter : met en avant le groupe WhatsApp des parents (le lien
+ * s'obtient par email, jamais publié), puis reprend le contenu de la page
+ * « contact » gérée dans Sanity (autres moyens de nous joindre).
+ */
+import Base from '../layouts/Base.astro';
+import Prose from '../components/Prose.astro';
+import { getPages, getParametres } from '../lib/sanity';
+
+const [pages, params] = await Promise.all([getPages(), getParametres()]);
+const page = pages.find((p) => p.slug === 'contact');
+const email = params?.email ?? 'lesoudeboege@gmail.com';
+
+const sujet = 'Rejoindre le groupe WhatsApp du Sou';
+const corps = [
+  'Bonjour,',
+  '',
+  'Je souhaite rejoindre le groupe WhatsApp des parents de l’école de Boëge.',
+  '',
+  'Mon nom : ',
+  'Mon ou mes enfants (prénom et classe) : ',
+  'Le numéro de téléphone à inviter : ',
+  '',
+  'Merci !',
+].join('\n');
+const mailto = `mailto:${email}?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+---
+<Base titre="Nous contacter" description="Le Sou communique surtout par WhatsApp : demandez le lien du groupe par email. Vous pouvez aussi nous écrire ou nous croiser à l’école.">
+  <div class="container page">
+    <header class="entete">
+      <h1>Nous contacter</h1>
+      <p class="intro">Le plus simple reste de venir nous voir à la sortie de l’école. Sinon, voici comment nous joindre.</p>
+    </header>
+
+    <section class="whatsapp" aria-labelledby="whatsapp-titre">
+      <div class="whatsapp__icone" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="56" height="56">
+          <path fill="currentColor" d="M16 3C8.8 3 3 8.7 3 15.8c0 2.5.7 4.9 2 7L3 29l6.4-2c2 1.1 4.3 1.7 6.6 1.7 7.2 0 13-5.7 13-12.8S23.2 3 16 3zm0 23.3c-2.1 0-4.1-.6-5.9-1.6l-.4-.2-3.8 1.2 1.2-3.6-.3-.4a10.4 10.4 0 0 1-1.7-5.8C5.1 10 10 5.3 16 5.3S26.9 10 26.9 15.8 22 26.3 16 26.3zm5.9-7.7c-.3-.2-1.9-1-2.2-1.1-.3-.1-.5-.2-.7.2-.2.3-.8 1.1-1 1.3-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.3-.2-.3 0-.5.1-.7l.5-.6.3-.5c.1-.2.1-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.1 1.3 3.3c.2.2 2.3 3.5 5.5 4.9.8.3 1.4.5 1.8.7.8.2 1.5.2 2 .1.6-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z"/>
+        </svg>
+      </div>
+      <div class="whatsapp__texte">
+        <h2 id="whatsapp-titre" class="craie">L’essentiel se passe sur WhatsApp</h2>
+        <p>
+          Rappels de dates, infos pratiques, appels aux bénévoles, photos des événements :
+          le groupe WhatsApp des parents est notre canal principal. Si vous avez un enfant à l’école
+          de Boëge, vous y êtes les bienvenus.
+        </p>
+        <p>
+          Pour protéger le groupe, le lien d’invitation n’est pas publié ici. Envoyez-nous un email
+          en indiquant votre nom, la classe de votre enfant et le numéro à inviter : un membre du bureau
+          vous répond avec le lien.
+        </p>
+        <a class="bouton bouton--rouge" href={mailto}>Demander le lien WhatsApp</a>
+        <p class="whatsapp__note">Le bouton ouvre un email déjà rédigé, il ne vous reste qu’à le compléter.</p>
+      </div>
+    </section>
+
+    {page && (
+      <section class="autres panneau" aria-labelledby="autres-titre">
+        <h2 id="autres-titre">Les autres moyens de nous joindre</h2>
+        {page.intro && <p class="intro">{page.intro}</p>}
+        <Prose value={page.corps} />
+      </section>
+    )}
+  </div>
+</Base>
+
+<style>
+  .page { margin-top: 2.5rem; display: grid; gap: 2rem; max-width: 56rem; }
+  .entete { display: grid; gap: 0.8rem; }
+  .intro { max-width: var(--mesure); color: var(--encre-2); font-size: 1.15rem; }
+
+  .whatsapp {
+    position: relative; overflow: hidden;
+    display: grid; grid-template-columns: auto 1fr; gap: 1.5rem; align-items: start;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border-radius: var(--rayon);
+    background:
+      radial-gradient(60% 80% at 15% 10%, rgba(255, 255, 255, 0.08), transparent 60%),
+      var(--ardoise);
+    color: var(--craie);
+    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.2);
+  }
+  .whatsapp::after {
+    content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: var(--arc);
+  }
+  .whatsapp__icone {
+    display: grid; place-items: center; width: 5rem; height: 5rem; border-radius: 50%;
+    background: var(--vert); color: #fff; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+  }
+  .whatsapp__texte { display: grid; gap: 0.9rem; max-width: 46rem; }
+  .whatsapp__texte h2 { font-size: clamp(1.9rem, 1.4rem + 2vw, 2.8rem); line-height: 1.05; }
+  .whatsapp__texte p { color: var(--craie-sombre); }
+  .whatsapp__texte .bouton { justify-self: start; margin-top: 0.3rem; }
+  .whatsapp__note { font-size: 0.9rem; }
+
+  .autres { display: grid; gap: 1rem; padding: clamp(1.25rem, 3vw, 2rem); }
+  @media (max-width: 40em) {
+    .whatsapp { grid-template-columns: 1fr; }
+    .whatsapp__icone { width: 4rem; height: 4rem; }
+    .whatsapp__icone svg { width: 44px; height: 44px; }
+  }
+</style>

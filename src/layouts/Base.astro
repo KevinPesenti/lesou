@@ -1,0 +1,47 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Bandeau from '../components/Bandeau.astro';
+import { getParametres, getMenuPages } from '../lib/sanity';
+
+interface Props {
+  titre?: string;
+  description?: string;
+  image?: string;
+}
+const { titre, description, image } = Astro.props;
+const [params, menu] = await Promise.all([getParametres(), getMenuPages()]);
+const nom = params?.nom ?? 'Le Sou des écoles de Boëge';
+const titreComplet = titre ? `${titre} – ${nom}` : nom;
+const desc = description ?? params?.description ?? 'Association de parents d’élèves de l’école publique de Boëge.';
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titreComplet}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/logo.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="alternate" type="application/rss+xml" title={`Actualités – ${nom}`} href="/rss.xml" />
+    <meta property="og:title" content={titreComplet} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image ?? new URL('/logo.png', Astro.site).href} />
+    <meta name="theme-color" content="#2e4a42" />
+  </head>
+  <body>
+    <a class="sr-only" href="#contenu">Aller au contenu</a>
+    <Header nom={nom} menu={menu} />
+    <Bandeau annonce={params?.annonce} />
+    <main id="contenu">
+      <slot />
+    </main>
+    <Footer nom={nom} params={params} />
+  </body>
+</html>

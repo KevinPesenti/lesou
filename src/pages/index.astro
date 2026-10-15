@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import Tableau from '../components/Tableau.astro';
+import CarteArticle from '../components/CarteArticle.astro';
+import LigneEvenement from '../components/LigneEvenement.astro';
+import { getArticles, getEvenementsAVenir, getParametres, debutAnneeScolaire, anneeScolaireDe } from '../lib/sanity';
+
+const [articles, evenements, params] = await Promise.all([getArticles(7), getEvenementsAVenir(5), getParametres()]);
+
+// Les articles de l'année scolaire en cours d'abord ; ceux de l'an dernier
+// suivent sous un titre « Souvenirs de … ». Les plus vieux restent sur /actualites.
+const debut = debutAnneeScolaire();
+const anneePrecedente = anneeScolaireDe(`${Number(debut.slice(0, 4)) - 1}-09-01`);
+const cetteAnnee = articles.filter((a) => a.date >= debut);
+const [premier, ...autres] = cetteAnnee.length ? cetteAnnee : articles;
+const souvenirs = cetteAnnee.length ? articles.filter((a) => anneeScolaireDe(a.date) === anneePrecedente) : [];
+---
+<Base>
+  <Tableau evenement={evenements[0] ?? null} params={params} />
+
+  <div class="container accueil">
+    <section class="actus" aria-labelledby="actus-titre">
+      <h2 id="actus-titre">Dernières actualités</h2>
+      {premier ? (
+        <div class="actus__liste">
+          <CarteArticle article={premier} niveau="h3" grande />
+          {autres.length > 0 && (
+            <div class="actus__grille">
+              {autres.map((a) => <CarteArticle article={a} grande={autres.length === 1} />)}
+            </div>
+          )}
+        </div>
+      ) : (
+        <p class="vide">Aucun article pour le moment. Les premières nouvelles arrivent bientôt.</p>
+      )}
+
+      {souvenirs.length > 0 && (
+        <section class="souvenirs" aria-label={`Souvenirs de ${anneePrecedente}`}>
+          <h3 class="souvenirs__titre"><span>Souvenirs de {anneePrecedente}</span></h3>
+          <div class="actus__grille">
+            {souvenirs.map((a) => <CarteArticle article={a} />)}
+          </div>
+        </section>
+      )}
+
+      <a class="bouton actus__tout" href="/actualites">Toutes les actualités</a>
+    </section>
+
+    <aside class="agenda" aria-labelledby="agenda-titre">
+      <h2 id="agenda-titre">À venir</h2>
+      {evenements.length > 0 ? (
+        <ul class="agenda__liste">
+          {evenements.map((ev, i) => <LigneEvenement evenement={ev} index={i} />)}
+        </ul>
+      ) : (
+        <p class="vide">Rien de prévu pour l’instant. Les prochaines dates seront annoncées ici.</p>
+      )}
+      <a href="/agenda">Voir tout l’agenda</a>
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .accueil {
+    display: grid; gap: 3rem; margin-top: 3rem;
+  }
+  @media (min-width: 60em) {
+    .accueil { grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr); gap: 4rem; }
+  }
+  .actus { display: grid; gap: 1.5rem; align-content: start; }
+  .actus__liste { display: grid; gap: 2.5rem; }
+  .actus__grille {
+    display: grid; gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  }
+  /* Une carte seule sur sa ligne prend toute la largeur (format horizontal) */
+  .actus__grille > :global(:only-child) { grid-column: 1 / -1; }
+  .actus__tout { justify-self: start; }
+
+  /* Les articles de l'an dernier, séparés par un trait à la craie */
+  .souvenirs { display: grid; gap: 1.25rem; margin-top: 1rem; }
+  .souvenirs__titre {
+    display: flex; align-items: center; gap: 1rem;
+    font-size: 1.15rem; color: var(--encre-2);
+  }
+  .souvenirs__titre::before, .souvenirs__titre::after {
+    content: ''; flex: 1; height: 0;
+    border-top: 3px dotted var(--ligne);
+  }
+  .souvenirs__titre::before { max-width: 2.5rem; }
+  .souvenirs .actus__grille { opacity: 0.92; }
+
+  .agenda { display: grid; gap: 1.2rem; align-content: start; }
+  .agenda__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem; }
+  .vide { color: var(--encre-2); }
+</style>

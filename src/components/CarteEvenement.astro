@@ -1,0 +1,69 @@
+---
+/**
+ * Carte d'un événement pour la page Agenda : le sticker de date collé dans
+ * le coin, le titre, le moment, le lieu, et l'étiquette « date à confirmer ».
+ */
+import type { Evenement } from '../lib/sanity';
+import { jourNumero, moisCourt, quandEvenement } from '../lib/sanity';
+interface Props { evenement: Evenement; index?: number }
+const { evenement: ev, index = 0 } = Astro.props;
+const href = ev.lien ?? (ev.article ? `/actualites/${ev.article.slug}` : null);
+const texteLien = ev.lien ? 'Je m’inscris' : 'Tous les détails';
+const couleurs = ['rouge', 'orange', 'jaune', 'vert', 'bleu'];
+const teinte = couleurs[index % couleurs.length];
+---
+<li class="carte panneau" style={`--teinte: var(--${teinte})`}>
+  <time class="carte__date" datetime={ev.debut}>
+    <span class="carte__jour">{jourNumero(ev.debut)}</span>
+    <span class="carte__mois">{moisCourt(ev.debut)}</span>
+  </time>
+  <div class="carte__corps">
+    <h3 class="carte__titre">{href ? <a href={href}>{ev.titre}</a> : ev.titre}</h3>
+    <p class="carte__quand">
+      {quandEvenement(ev)}{ev.lieu && <>, {ev.lieu}</>}
+      {ev.previsionnel && <span class="carte__etiquette">date à confirmer</span>}
+    </p>
+    {ev.description && <p class="carte__desc">{ev.description}</p>}
+    <p class="carte__actions">
+      {href && <a class="carte__lien" href={href}>{texteLien}</a>}
+      <a class="carte__lien carte__lien--cal" href={`/agenda/${ev._id}.ics`} download>Ajouter à mon calendrier</a>
+    </p>
+  </div>
+</li>
+
+<style>
+  .carte {
+    position: relative;
+    display: grid; gap: 0.5rem; align-content: start;
+    padding: 1.4rem 1.3rem 1.3rem 1.3rem;
+    border-top: 5px solid var(--teinte);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .carte:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(36, 48, 44, 0.06), 0 16px 32px -14px rgba(36, 48, 44, 0.3); }
+  .carte__date {
+    position: absolute; top: -0.9rem; right: 1rem;
+    display: grid; justify-items: center; width: 3.6rem; padding: 0.45rem 0 0.5rem;
+    border-radius: 10px; background: var(--teinte); color: #fff; line-height: 1;
+    transform: rotate(4deg);
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--teinte) 70%, black);
+  }
+  .carte__jour { font-family: var(--titre-police); font-size: 1.55rem; font-variation-settings: 'wght' 600; }
+  .carte__mois { font-size: 0.78rem; margin-top: 0.15rem; text-transform: lowercase; }
+  .carte__corps { display: grid; gap: 0.4rem; padding-right: 3.6rem; align-content: start; }
+  .carte__titre { font-size: 1.25rem; line-height: 1.15; }
+  .carte__titre a { color: var(--encre); text-decoration: none; }
+  .carte__titre a:hover { text-decoration: underline; text-decoration-color: var(--teinte); text-decoration-thickness: 3px; }
+  .carte__quand { font-size: 0.95rem; color: var(--encre-2); display: flex; flex-wrap: wrap; gap: 0.4rem 0.6rem; align-items: center; }
+  .carte__quand::first-letter { text-transform: uppercase; }
+  .carte__etiquette {
+    font-family: var(--craie-police); font-weight: 600; font-size: 1rem; line-height: 1;
+    padding: 0.2rem 0.55rem; border-radius: 999px;
+    background: var(--papier-2); color: var(--encre-2);
+    border: 1px dashed var(--ligne);
+  }
+  .carte__desc { font-size: 0.98rem; }
+  .carte__actions { display: flex; flex-wrap: wrap; gap: 0.3rem 1.2rem; margin-top: 0.2rem; }
+  .carte__lien { color: var(--ardoise); text-decoration-color: var(--teinte); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .carte__lien--cal { color: var(--encre-2); font-size: 0.92rem; text-decoration-color: var(--ligne); }
+  .carte__lien--cal:hover { color: var(--ardoise); }
+</style>

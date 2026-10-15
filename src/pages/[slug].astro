@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import Prose from '../components/Prose.astro';
+import { getPages } from '../lib/sanity';
+
+export async function getStaticPaths() {
+  const pages = await getPages();
+  // « contact » a son propre gabarit (src/pages/contact.astro) qui reprend le contenu Sanity.
+  return pages.filter((p) => p.slug !== 'contact').map((p) => ({ params: { slug: p.slug }, props: { page: p } }));
+}
+const { page } = Astro.props;
+---
+<Base titre={page.titre} description={page.intro}>
+  <article class="container page">
+    <header class="entete">
+      <h1>{page.titre}</h1>
+      {page.intro && <p class="intro">{page.intro}</p>}
+    </header>
+    <Prose value={page.corps} />
+  </article>
+</Base>
+
+<style>
+  .page { margin-top: 2.5rem; display: grid; gap: 2rem; max-width: 52rem; }
+  .entete { display: grid; gap: 0.8rem; }
+  .intro { max-width: var(--mesure); color: var(--encre-2); font-size: 1.15rem; }
+</style>

@@ -1,0 +1,45 @@
+---
+import Base from '../layouts/Base.astro';
+import { getPartenaires, urlFor } from '../lib/sanity';
+const partenaires = await getPartenaires();
+---
+<Base titre="Nos partenaires" description="Les commerçants et entreprises qui soutiennent le Sou des écoles de Boëge.">
+  <div class="container page">
+    <header class="entete">
+      <h1>Nos partenaires</h1>
+      <p class="intro">Merci à celles et ceux qui soutiennent les projets des enfants de l’école.</p>
+    </header>
+    {partenaires.length > 0 ? (
+      <ul class="liste">
+        {partenaires.map((p) => (
+          <li class="part">
+            {p.logo?.asset && <img class="part__logo" src={urlFor(p.logo).width(400).url()} alt="" loading="lazy" />}
+            <span class="part__nom">{p.url ? <a href={p.url} rel="noopener">{p.nom}</a> : p.nom}</span>
+            {p.description && <span class="part__desc">{p.description}</span>}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="vide">La liste des partenaires sera bientôt publiée.</p>
+    )}
+  </div>
+</Base>
+
+<style>
+  .page { margin-top: 2.5rem; display: grid; gap: 2.5rem; }
+  .entete { display: grid; gap: 0.8rem; }
+  .intro { color: var(--encre-2); font-size: 1.1rem; }
+  .liste {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  }
+  .part { display: grid; gap: 0.3rem; align-content: start; }
+  .part__logo {
+    height: 5rem; width: 100%; object-fit: contain; object-position: left;
+    margin-bottom: 0.4rem;
+  }
+  .part__nom { font-variation-settings: 'wght' 650; }
+  .part__desc { color: var(--encre-2); font-size: 0.95rem; }
+  .vide { color: var(--encre-2); }
+</style>

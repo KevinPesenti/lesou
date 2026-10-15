@@ -1,0 +1,103 @@
+---
+import type { MenuPage } from '../lib/sanity';
+interface Props { nom: string; menu: MenuPage[] }
+const { nom, menu } = Astro.props;
+const path = Astro.url.pathname;
+const liens = [
+  { href: '/actualites', label: 'Actualités' },
+  { href: '/agenda', label: 'Agenda' },
+  { href: '/cotisation', label: 'Cotisation' },
+  { href: '/bureau', label: 'Le bureau' },
+  { href: '/memento', label: 'Memento' },
+  ...menu.map((p) => ({ href: `/${p.slug}`, label: p.titre })),
+];
+const actif = (href: string) => path === href || path.startsWith(href + '/');
+---
+<header class="entete">
+  <div class="container entete__barre">
+    <a class="marque" href="/">
+      <img src="/logo.png" alt="" width="48" height="48" decoding="async" />
+      <span>{nom}</span>
+    </a>
+    <nav class="menu" aria-label="Navigation principale">
+      <button class="menu__bouton" type="button" aria-expanded="false" aria-controls="menu-liste">
+        <span class="sr-only">Menu</span>
+        <span class="menu__trait"></span>
+        <span class="menu__trait"></span>
+        <span class="menu__trait"></span>
+      </button>
+      <ul class="menu__liste" id="menu-liste">
+        {liens.map((l) => (
+          <li><a href={l.href} aria-current={actif(l.href) ? 'page' : undefined}>{l.label}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+  <div class="entete__arc" aria-hidden="true"></div>
+</header>
+
+<script>
+  const bouton = document.querySelector<HTMLButtonElement>('.menu__bouton');
+  const menu = document.querySelector<HTMLElement>('.menu');
+  bouton?.addEventListener('click', () => {
+    const ouvert = menu?.classList.toggle('menu--ouvert') ?? false;
+    bouton.setAttribute('aria-expanded', String(ouvert));
+  });
+  document.addEventListener('click', (e) => {
+    if (menu && !menu.contains(e.target as Node)) {
+      menu.classList.remove('menu--ouvert');
+      bouton?.setAttribute('aria-expanded', 'false');
+    }
+  });
+</script>
+
+<style>
+  .entete { background: var(--carte); }
+  .entete__arc { height: 5px; background: var(--arc); }
+  .entete__barre {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    min-height: 4.25rem;
+  }
+  .marque {
+    display: inline-flex; align-items: center; gap: 0.7rem;
+    color: var(--encre); text-decoration: none; white-space: nowrap;
+    font-family: var(--titre-police); font-variation-settings: 'wght' 600; font-size: 1.15rem;
+  }
+  .marque img { width: 48px; height: 48px; border-radius: 50%; }
+  .menu { position: relative; }
+  .menu__bouton {
+    cursor: pointer; border: 0; background: none; padding: 0;
+    width: 2.8rem; height: 2.8rem; border-radius: 999px;
+    display: grid; place-content: center; gap: 5px;
+  }
+  .menu__bouton:hover { background: var(--papier-2); }
+  .menu__trait { display: block; width: 22px; height: 2.5px; background: var(--encre); border-radius: 2px; }
+  .menu__liste {
+    display: none;
+    list-style: none; margin: 0; padding: 0.5rem 0;
+    position: absolute; right: 0; top: calc(100% + 0.5rem); z-index: 10;
+    min-width: 14rem;
+    background: var(--carte); border: 1px solid var(--ligne); border-radius: var(--rayon);
+    box-shadow: var(--ombre);
+  }
+  .menu--ouvert .menu__liste { display: block; }
+  .menu__liste a {
+    display: block; padding: 0.6rem 1.1rem;
+    color: var(--encre); text-decoration: none;
+    font-family: var(--titre-police); font-variation-settings: 'wght' 500; font-size: 1.05rem;
+  }
+  .menu__liste a:hover { background: var(--papier); }
+  .menu__liste a[aria-current='page'] { box-shadow: inset 4px 0 0 var(--jaune); }
+
+  @media (min-width: 56em) {
+    .menu__bouton { display: none; }
+    .menu__liste {
+      display: flex; gap: 0.15rem; flex-wrap: wrap; justify-content: flex-end;
+      position: static; min-width: 0; padding: 0;
+      background: none; border: 0; box-shadow: none;
+    }
+    .menu__liste a { padding: 0.45rem 0.8rem; border-radius: 999px; }
+    .menu__liste a:hover { background: var(--papier-2); }
+    .menu__liste a[aria-current='page'] { box-shadow: none; background: var(--papier-2); }
+  }
+</style>

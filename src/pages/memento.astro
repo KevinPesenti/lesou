@@ -1,0 +1,61 @@
+---
+import Base from '../layouts/Base.astro';
+import Icone from '../components/Icone.astro';
+import { getContacts } from '../lib/sanity';
+const contacts = await getContacts();
+const couleurs = ['rouge', 'orange', 'jaune', 'vert', 'bleu'];
+const tel = (t: string) => `tel:+33${t.replace(/\D/g, '').replace(/^0/, '')}`;
+---
+<Base titre="Memento" description="Les numéros et adresses utiles autour de l’école de Boëge : école, garderie, cantine, mairie, médiathèque.">
+  <div class="container">
+    <header class="page-entete">
+      <h1>Memento</h1>
+      <p class="intro">Un maximum d’informations en un minimum de place : les contacts qui servent au quotidien autour de l’école.</p>
+    </header>
+    {contacts.length > 0 ? (
+      <ul class="fiches">
+        {contacts.map((c, i) => (
+          <li class="fiche panneau" style={`--teinte: var(--${couleurs[i % couleurs.length]})`}>
+            <span class="fiche__icone"><Icone nom={c.icone} /></span>
+            <div class="fiche__corps">
+              <h2 class="fiche__nom">{c.nom}</h2>
+              {c.sousTitre && <p class="fiche__sous">{c.sousTitre}</p>}
+              <ul class="fiche__lignes">
+                {(c.telephones ?? []).map((t) => <li><a href={tel(t)}>{t}</a></li>)}
+                {c.email && <li><a href={`mailto:${c.email}`}>{c.email}</a></li>}
+                {c.site && <li><a href={c.site} rel="noopener">{c.site.includes('facebook.com') ? 'Page Facebook' : 'Site internet'}</a></li>}
+                {c.adresse && <li class="fiche__texte">{c.adresse}</li>}
+                {c.horaires && <li class="fiche__texte">{c.horaires}</li>}
+              </ul>
+            </div>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="vide">Les contacts utiles seront bientôt publiés.</p>
+    )}
+  </div>
+</Base>
+
+<style>
+  .fiches {
+    list-style: none; margin: 2.5rem 0 0; padding: 0;
+    display: grid; gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  }
+  .fiche {
+    display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start;
+    padding: 1.25rem;
+    border-top: 5px solid var(--teinte);
+  }
+  .fiche__icone {
+    display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%;
+    background: color-mix(in srgb, var(--teinte) 18%, white); color: var(--encre);
+  }
+  .fiche__icone :global(svg) { width: 26px; height: 26px; }
+  .fiche__nom { font-size: 1.2rem; }
+  .fiche__sous { color: var(--encre-2); font-size: 0.95rem; margin-top: 0.15rem; }
+  .fiche__lignes { list-style: none; margin: 0.7rem 0 0; padding: 0; display: grid; gap: 0.35rem; }
+  .fiche__lignes a { text-decoration-color: var(--teinte); text-decoration-thickness: 2px; overflow-wrap: anywhere; }
+  .fiche__texte { color: var(--encre-2); white-space: pre-line; }
+</style>

@@ -1,0 +1,243 @@
+---
+/**
+ * La salle de classe de la page d'accueil : à gauche, le tableau d'école avec le
+ * mot de bienvenue ; à droite, un papier scotché sur l'ardoise qui annonce le
+ * prochain rendez-vous. Un arc-en-ciel à la craie rappelle le logo, et quelques
+ * griffonnages flottent doucement derrière.
+ */
+import type { Evenement, Parametres } from '../lib/sanity';
+import { jourNumero, moisCourt, quandEvenement } from '../lib/sanity';
+interface Props { evenement: Evenement | null; params: Parametres | null }
+const { evenement, params } = Astro.props;
+const lienEvenement = evenement?.lien ?? (evenement?.article ? `/actualites/${evenement.article.slug}` : '/agenda');
+const texteBouton = evenement?.lien ? 'Je m’inscris' : evenement?.article ? 'Tous les détails' : 'Voir l’agenda';
+const accroche = params?.accroche ?? 'Des fêtes, des sorties et des projets pour les enfants de l’école de Boëge';
+const description = params?.description ?? 'Le Sou des écoles est l’association des parents d’élèves de l’école publique de Boëge.';
+---
+<section class="tableau" aria-labelledby="tableau-titre">
+  <div class="tableau__halo" aria-hidden="true"></div>
+
+  <!-- Griffonnages à la craie, qui flottent lentement -->
+  <svg class="griffon griffon--etoile-1" aria-hidden="true" viewBox="0 0 40 40">
+    <path d="M20 4l4.6 10.3 11.2 1.2-8.4 7.6 2.4 11L20 28.5 10.2 34.1l2.4-11-8.4-7.6 11.2-1.2z" />
+  </svg>
+  <svg class="griffon griffon--soleil" aria-hidden="true" viewBox="0 0 60 60">
+    <circle cx="30" cy="30" r="11" />
+    <path d="M30 4v8M30 48v8M4 30h8M48 30h8M11.6 11.6l5.7 5.7M42.7 42.7l5.7 5.7M11.6 48.4l5.7-5.7M42.7 17.3l5.7-5.7" />
+  </svg>
+  <svg class="griffon griffon--nuage" aria-hidden="true" viewBox="0 0 80 50">
+    <path d="M20 42h40a12 12 0 0 0 1-24 16 16 0 0 0-30-4 11 11 0 0 0-11 28z" />
+  </svg>
+  <svg class="griffon griffon--coeur" aria-hidden="true" viewBox="0 0 40 40">
+    <path d="M20 35S4 24 4 13a8 8 0 0 1 16-2 8 8 0 0 1 16 2c0 11-16 22-16 22z" />
+  </svg>
+  <svg class="griffon griffon--etoile-2" aria-hidden="true" viewBox="0 0 40 40">
+    <path d="M20 4l4.6 10.3 11.2 1.2-8.4 7.6 2.4 11L20 28.5 10.2 34.1l2.4-11-8.4-7.6 11.2-1.2z" />
+  </svg>
+  <svg class="griffon griffon--spirale" aria-hidden="true" viewBox="0 0 50 50">
+    <path d="M25 25c2 0 3-2 2-4s-4-3-7-1-4 7-1 10 9 4 13 0 5-12 0-16-15-5-20 1-5 16 1 21 18 6 24 0" />
+  </svg>
+
+  <svg class="tableau__arc" aria-hidden="true" viewBox="0 0 200 110" fill="none" stroke-linecap="round" stroke-width="9">
+    <path d="M10 100a90 90 0 0 1 180 0" stroke="var(--rouge)" />
+    <path d="M26 100a74 74 0 0 1 148 0" stroke="var(--orange)" />
+    <path d="M42 100a58 58 0 0 1 116 0" stroke="var(--jaune)" />
+    <path d="M58 100a42 42 0 0 1 84 0" stroke="var(--vert)" />
+    <path d="M74 100a26 26 0 0 1 52 0" stroke="var(--bleu)" />
+  </svg>
+
+  <div class:list={['container', 'classe', { 'classe--seul': !evenement }]}>
+    <div class="tableau__contenu">
+      <p class="craie tableau__sur">Bienvenue</p>
+      <h1 id="tableau-titre" class="craie tableau__titre">{accroche}</h1>
+      <p class="tableau__desc">{description}</p>
+      <div class="tableau__actions">
+        <a class="bouton bouton--craie" href="/actualites">Lire les actualités</a>
+        <a class="tableau__lien" href="/agenda">Voir l’agenda de l’année</a>
+      </div>
+    </div>
+
+    {evenement && (
+      <aside class="note" aria-labelledby="note-titre">
+        <span class="note__scotch" aria-hidden="true"></span>
+        <p class="note__sur">Prochain rendez-vous</p>
+        <div class="note__entete">
+          <time class="note__date" datetime={evenement.debut}>
+            <span class="note__jour">{jourNumero(evenement.debut)}</span>
+            <span class="note__mois">{moisCourt(evenement.debut)}</span>
+          </time>
+          <div>
+            <h2 id="note-titre" class="note__titre">{evenement.titre}</h2>
+            <p class="note__quand">{quandEvenement(evenement)}{evenement.lieu && <>, {evenement.lieu}</>}{evenement.previsionnel && <em> (date à confirmer)</em>}</p>
+          </div>
+        </div>
+        {evenement.description && <p class="note__desc">{evenement.description}</p>}
+        <a class="bouton note__bouton" href={lienEvenement}>{texteBouton}</a>
+      </aside>
+    )}
+  </div>
+
+  <svg class="tableau__trait" aria-hidden="true" viewBox="0 0 120 12" preserveAspectRatio="none">
+    <path d="M2 8c20-5 40 3 60-1s38-5 56 2" fill="none" stroke="var(--jaune)" stroke-width="2.2" stroke-linecap="round" />
+  </svg>
+</section>
+
+<style>
+  .tableau {
+    position: relative;
+    background:
+      radial-gradient(50% 60% at 85% 90%, rgba(255, 255, 255, 0.05), transparent 60%),
+      var(--ardoise);
+    color: var(--craie);
+    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+  }
+
+  /* Halo de lumière qui dérive sur l'ardoise */
+  .tableau__halo {
+    position: absolute; inset: -30%;
+    background: radial-gradient(38% 48% at 28% 30%, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06) 45%, transparent 70%);
+    animation: halo-derive 8s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes halo-derive {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(22%, 14%) scale(1.2); }
+  }
+
+  /* La salle de classe : tableau à gauche, papier scotché à droite */
+  .classe {
+    position: relative;
+    padding: clamp(2.5rem, 6vw, 5rem) var(--gouttiere) clamp(3.5rem, 7vw, 5.5rem);
+    display: grid; gap: 2.5rem; align-items: center;
+  }
+  @media (min-width: 60em) {
+    .classe { grid-template-columns: minmax(0, 3fr) minmax(18rem, 2fr); gap: clamp(2.5rem, 5vw, 5rem); }
+    .classe--seul { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .tableau__contenu {
+    display: grid; gap: 0.9rem; justify-items: center; text-align: center;
+    max-width: 40rem; margin-inline: auto;
+  }
+  @media (min-width: 60em) {
+    .tableau__contenu { justify-items: start; text-align: left; margin-inline: 0; }
+    .classe--seul .tableau__contenu { justify-items: center; text-align: center; margin-inline: auto; }
+  }
+  .tableau__sur { font-size: clamp(1.3rem, 1rem + 1.2vw, 1.8rem); color: var(--craie-sombre); }
+  .tableau__titre {
+    font-size: clamp(2.4rem, 1.6rem + 3.6vw, 4.4rem);
+    line-height: 1.04;
+    text-wrap: balance;
+  }
+  .tableau__desc { color: var(--craie-sombre); max-width: 46ch; font-size: 1.05rem; }
+  .tableau__actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.6rem 1.4rem; margin-top: 0.5rem; }
+  @media (min-width: 60em) { .classe:not(.classe--seul) .tableau__actions { justify-content: start; } }
+  .tableau__lien { color: var(--craie); text-decoration-color: var(--jaune); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .tableau__lien:hover { text-decoration-color: var(--craie); }
+
+  /* Le papier scotché */
+  .note {
+    position: relative;
+    display: grid; gap: 0.8rem;
+    width: 100%; max-width: 26rem; margin-inline: auto;
+    padding: 1.6rem 1.5rem 1.5rem;
+    background: var(--papier); color: var(--encre);
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 18px 32px -18px rgba(0, 0, 0, 0.6);
+    transform: rotate(1.5deg);
+  }
+  .note__scotch {
+    position: absolute; top: -0.8rem; left: 50%;
+    width: 7rem; height: 1.7rem;
+    background: rgba(246, 241, 230, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    transform: translateX(-50%) rotate(-3deg);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  }
+  .note__sur { font-family: var(--craie-police); font-weight: 600; font-size: 1.35rem; color: var(--encre-2); line-height: 1; }
+  .note__entete { display: grid; grid-template-columns: 3.6rem 1fr; gap: 0.9rem; align-items: center; }
+  .note__date {
+    display: grid; justify-items: center; padding: 0.45rem 0 0.5rem;
+    border-radius: 10px; background: var(--rouge); color: #fff; line-height: 1;
+    transform: rotate(-4deg);
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--rouge) 70%, black);
+  }
+  .note__jour { font-family: var(--titre-police); font-size: 1.55rem; font-variation-settings: 'wght' 600; }
+  .note__mois { font-size: 0.78rem; margin-top: 0.15rem; text-transform: lowercase; }
+  .note__titre { font-size: 1.35rem; line-height: 1.15; text-wrap: balance; }
+  .note__quand { font-size: 0.92rem; color: var(--encre-2); margin-top: 0.25rem; }
+  .note__quand::first-letter { text-transform: uppercase; }
+  .note__desc { font-size: 0.95rem; color: var(--encre-2); }
+  .note__bouton { justify-self: start; margin-top: 0.2rem; }
+
+  .tableau__trait {
+    position: absolute; left: 50%; bottom: 0.9rem; transform: translateX(-50%);
+    width: min(14rem, 50%); height: 10px; opacity: 0.9;
+  }
+
+  /* Arc-en-ciel : chaque trait apparaît l'un après l'autre à l'ouverture */
+  .tableau__arc {
+    position: absolute; width: clamp(6rem, 12vw, 10rem); opacity: 0.55;
+    stroke-dasharray: 3 2.2; /* un trait de craie, un peu poudreux */
+    left: max(1rem, 3vw); bottom: -0.4rem;
+  }
+  .tableau__arc path {
+    transform-origin: 100px 100px;
+    animation: arc-trace 0.7s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+    animation-delay: calc(0.15s + var(--i, 0) * 0.12s);
+  }
+  .tableau__arc path:nth-child(1) { --i: 0; }
+  .tableau__arc path:nth-child(2) { --i: 1; }
+  .tableau__arc path:nth-child(3) { --i: 2; }
+  .tableau__arc path:nth-child(4) { --i: 3; }
+  .tableau__arc path:nth-child(5) { --i: 4; }
+  @keyframes arc-trace {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Griffonnages : chacun flotte à son rythme, en décalé */
+  .griffon {
+    position: absolute;
+    fill: none; stroke: var(--craie); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 2.5 1.5;
+    opacity: 0.22;
+    pointer-events: none;
+    animation: griffon-flotte var(--duree, 9s) ease-in-out infinite alternate;
+    animation-delay: var(--retard, 0s);
+    will-change: transform;
+  }
+  @keyframes griffon-flotte {
+    from { transform: translate3d(0, 0, 0) rotate(var(--angle, 0deg)); }
+    to { transform: translate3d(var(--dx, 4px), -12px, 0) rotate(calc(var(--angle, 0deg) + 6deg)); }
+  }
+  .griffon--etoile-1 { width: 2.4rem; left: 2.5%; top: 42%; --duree: 4.5s; --angle: -8deg; }
+  .griffon--soleil { width: 4rem; right: 5%; top: 9%; --duree: 6s; --retard: -3s; --angle: 4deg; --dx: -6px; }
+  .griffon--nuage { width: 5rem; left: 24%; top: 7%; --duree: 7s; --retard: -6s; --dx: 10px; }
+  .griffon--coeur { width: 2.2rem; right: 4%; bottom: 14%; --duree: 4s; --retard: -2s; --angle: 10deg; }
+  .griffon--etoile-2 { width: 1.6rem; left: 52%; top: 14%; --duree: 3.5s; --retard: -4s; --angle: 15deg; --dx: -4px; }
+  .griffon--spirale { width: 2.8rem; left: 44%; bottom: 10%; --duree: 6.5s; --retard: -8s; --angle: -5deg; }
+
+  /* Les étoiles scintillent légèrement, en plus de flotter */
+  .griffon--etoile-1 path, .griffon--etoile-2 path {
+    animation: griffon-scintille 1.8s ease-in-out infinite alternate;
+  }
+  .griffon--etoile-2 path { animation-delay: -1.4s; }
+  @keyframes griffon-scintille {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+  }
+
+  @media (max-width: 48em) {
+    .tableau__arc { width: 5.5rem; opacity: 0.35; }
+    .griffon--nuage, .griffon--spirale, .griffon--etoile-2 { display: none; }
+    .griffon--soleil { width: 3rem; right: 4%; top: 4%; }
+    .griffon--coeur { right: 6%; bottom: 6%; }
+    .griffon--etoile-1 { left: 5%; top: 6%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tableau__halo, .griffon, .griffon path, .tableau__arc path { animation: none; }
+  }
+</style>

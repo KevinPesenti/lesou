@@ -1,0 +1,19 @@
+---
+import type { SanityFile } from '../lib/sanity';
+import { tailleFichier } from '../lib/sanity';
+interface Props { fichier: SanityFile }
+const { fichier } = Astro.props;
+const asset = fichier.asset;
+const nom = fichier.titre || asset?.originalFilename || 'Document';
+const ext = (asset?.extension || 'doc').slice(0, 4);
+const href = asset?.url ? `${asset.url}?dl=${encodeURIComponent(asset.originalFilename ?? nom)}` : '#';
+---
+{asset?.url && (
+  <a class="fichier" href={href} download>
+    <span class="fichier__ext" aria-hidden="true">{ext}</span>
+    <span>
+      <span class="fichier__nom">{nom}</span>
+      <br /><span class="fichier__meta">Télécharger{asset.size ? ` (${tailleFichier(asset.size)})` : ''}</span>
+    </span>
+  </a>
+)}

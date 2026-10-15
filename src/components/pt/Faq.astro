@@ -1,0 +1,67 @@
+---
+/**
+ * Bloc « Questions fréquentes » du texte riche : une question par ligne,
+ * qui se déplie au clic. La pastille reprend les couleurs de l'arc-en-ciel.
+ */
+import type { Props as PtProps } from 'astro-portabletext/types';
+interface Faq { _type: 'faq'; titre?: string; questions?: { _key: string; question: string; reponse: string }[] }
+const { node } = Astro.props as PtProps<Faq>;
+const questions = node.questions ?? [];
+const couleurs = ['--rouge', '--orange', '--jaune', '--vert', '--bleu'];
+---
+{questions.length > 0 && (
+  <section class="faq" aria-label={node.titre ?? 'Questions fréquentes'}>
+    {node.titre && <h2 class="faq__titre">{node.titre}</h2>}
+    <div class="faq__liste">
+      {questions.map((q, i) => (
+        <details class="faq__item" style={`--pastille: var(${couleurs[i % couleurs.length]})`}>
+          <summary class="faq__question">
+            <span class="faq__pastille" aria-hidden="true">?</span>
+            <span class="faq__texte">{q.question}</span>
+            <svg class="faq__chevron" aria-hidden="true" viewBox="0 0 20 20" width="20" height="20"><path d="M5 8l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </summary>
+          <div class="faq__reponse">
+            {q.reponse.split(/\n+/).map((p) => <p>{p}</p>)}
+          </div>
+        </details>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .faq { margin: 2.2em 0; }
+  .faq__titre { margin: 0 0 0.8em; font-size: 1.55rem; }
+  .faq__liste { display: grid; gap: 0.6rem; }
+  .faq__item {
+    background: var(--carte);
+    border: 1px solid var(--ligne);
+    border-left: 5px solid var(--pastille);
+    border-radius: var(--rayon-petit);
+    overflow: hidden;
+    transition: box-shadow 150ms ease;
+  }
+  .faq__item:hover, .faq__item[open] { box-shadow: 0 10px 24px -16px rgba(36, 48, 44, 0.35); }
+  .faq__question {
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 0.8rem;
+    padding: 0.85rem 1rem;
+    cursor: pointer; list-style: none;
+    font-family: var(--titre-police); font-variation-settings: 'wght' 560; font-size: 1.08rem;
+    color: var(--encre);
+  }
+  .faq__question::-webkit-details-marker { display: none; }
+  .faq__question:focus-visible { outline: 3px solid var(--jaune); outline-offset: -3px; }
+  .faq__pastille {
+    display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 50%;
+    background: var(--pastille); color: #fff;
+    font-family: var(--craie-police); font-weight: 600; font-size: 1.25rem; line-height: 1;
+    transform: rotate(-8deg);
+  }
+  .faq__chevron { color: var(--encre-2); transition: transform 200ms ease; }
+  .faq__item[open] .faq__chevron { transform: rotate(180deg); }
+  .faq__reponse { padding: 0 1rem 1rem 3.7rem; color: var(--encre-2); }
+  .faq__reponse p { margin: 0 0 0.6em; }
+  .faq__reponse p:last-child { margin-bottom: 0; }
+  @media (prefers-reduced-motion: reduce) { .faq__chevron, .faq__item { transition: none; } }
+  @media (max-width: 40em) { .faq__reponse { padding-left: 1rem; } }
+</style>

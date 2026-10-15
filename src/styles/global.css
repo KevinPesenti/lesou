@@ -1,0 +1,166 @@
+@import '@fontsource-variable/hanken-grotesk/wght.css';
+@import '@fontsource-variable/hanken-grotesk/wght-italic.css';
+@import '@fontsource-variable/fredoka/index.css';
+@import '@fontsource/caveat/600.css';
+
+:root {
+  /* Une ardoise d'école, du papier chaleureux, et l'arc-en-ciel du logo */
+  --ardoise: #2e4a42;
+  --ardoise-sombre: #1f3730;
+  --craie: #f6f1e6;
+  --craie-sombre: rgba(246, 241, 230, 0.72);
+
+  --papier: #fbf7ef;
+  --papier-2: #f3ecdd;
+  --carte: #ffffff;
+  --ligne: #e6ddcb;
+  --encre: #24302c;
+  --encre-2: #5a665f;
+  --lien: #2e4a42;
+
+  --rouge: #e0533f;
+  --orange: #f08a3e;
+  --jaune: #f3c74f;
+  --vert: #6db36b;
+  --bleu: #4f9bd9;
+  --arc: linear-gradient(90deg, var(--rouge) 0 20%, var(--orange) 20% 40%, var(--jaune) 40% 60%, var(--vert) 60% 80%, var(--bleu) 80%);
+
+  --police: 'Hanken Grotesk Variable', system-ui, sans-serif;
+  --titre-police: 'Fredoka Variable', 'Hanken Grotesk Variable', system-ui, sans-serif;
+  --craie-police: 'Caveat', 'Segoe Print', cursive;
+
+  --mesure: 66ch;
+  --largeur: 72rem;
+  --gouttiere: 1rem;
+  --rayon: 14px;
+  --rayon-petit: 8px;
+  --ombre: 0 1px 2px rgba(36, 48, 44, 0.06), 0 8px 24px -12px rgba(36, 48, 44, 0.18);
+}
+@media (min-width: 40em) { :root { --gouttiere: 1.5rem; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--police);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  font-variation-settings: 'wght' 430;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* La graisse du corps est fixée via la police variable : le gras doit donc la redéfinir */
+strong, b { font-variation-settings: 'wght' 700; }
+
+img, svg, video { display: block; max-width: 100%; height: auto; }
+a { color: var(--lien); text-decoration-thickness: 1px; text-underline-offset: 0.16em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--bleu); outline-offset: 2px; }
+
+h1, h2, h3 {
+  margin: 0;
+  font-family: var(--titre-police);
+  font-variation-settings: 'wght' 600;
+  line-height: 1.12;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2.1rem, 1.5rem + 2.4vw, 3.1rem); }
+h2 { font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem); }
+h3 { font-size: 1.25rem; }
+p { margin: 0; }
+
+.container {
+  width: min(100% - 2 * var(--gouttiere), var(--largeur));
+  margin-inline: auto;
+}
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* Boutons */
+.bouton {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5em;
+  padding: 0.7em 1.25em;
+  border-radius: 999px;
+  background: var(--ardoise); color: var(--craie);
+  font-family: var(--titre-police); font-variation-settings: 'wght' 500; font-size: 1.05rem;
+  text-decoration: none;
+  border: 2px solid var(--ardoise);
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+.bouton:hover { background: var(--ardoise-sombre); border-color: var(--ardoise-sombre); }
+.bouton:active { transform: translateY(1px); }
+.bouton--craie { background: transparent; color: var(--craie); border-color: var(--craie-sombre); }
+.bouton--craie:hover { background: rgba(246, 241, 230, 0.12); border-color: var(--craie); }
+.bouton--rouge { background: var(--rouge); border-color: var(--rouge); color: #fff; }
+.bouton--rouge:hover { background: #c7442f; border-color: #c7442f; }
+.bouton--clair { background: var(--carte); color: var(--ardoise); border-color: var(--ligne); }
+.bouton--clair:hover { background: var(--papier-2); border-color: var(--ligne); }
+
+/* Craie : sur fond ardoise uniquement */
+.craie { font-family: var(--craie-police); font-weight: 600; color: var(--craie); }
+
+/* Surface « carte » */
+.panneau {
+  background: var(--carte);
+  border: 1px solid var(--ligne);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre);
+}
+
+/* Texte riche (articles et pages) */
+.prose { max-width: var(--mesure); --flow: 1.1em; }
+.prose > * + * { margin-top: var(--flow); }
+.prose h2 { margin-top: 1.8em; font-size: 1.55rem; }
+.prose h3 { margin-top: 1.5em; }
+.prose ul, .prose ol { padding-left: 1.3em; }
+.prose ul { list-style: none; padding-left: 0; }
+.prose ul > li { position: relative; padding-left: 1.5em; }
+.prose ul > li::before {
+  content: ''; position: absolute; left: 0.1em; top: 0.55em;
+  width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--jaune);
+}
+.prose ul > li:nth-child(5n+2)::before { background: var(--vert); }
+.prose ul > li:nth-child(5n+3)::before { background: var(--bleu); }
+.prose ul > li:nth-child(5n+4)::before { background: var(--rouge); }
+.prose ul > li:nth-child(5n+5)::before { background: var(--orange); }
+.prose li + li { margin-top: 0.4em; }
+.prose blockquote {
+  margin: 1.4em 0; padding: 0.4em 0 0.4em 1.1em;
+  border-left: 4px solid var(--jaune);
+  color: var(--encre-2); font-style: italic;
+}
+.prose figure { margin: 1.6em 0; }
+.prose figure img { border-radius: var(--rayon); width: 100%; }
+.prose figcaption { margin-top: 0.5em; font-size: 0.9rem; color: var(--encre-2); }
+.prose a { text-decoration-color: var(--jaune); text-decoration-thickness: 2px; }
+
+/* Lien « document » (PDF, etc.) */
+.fichier {
+  display: flex; align-items: center; gap: 0.9rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--ligne); border-radius: var(--rayon-petit);
+  background: var(--carte);
+  color: var(--encre); text-decoration: none;
+}
+.fichier:hover { border-color: var(--ardoise); }
+.fichier__ext {
+  flex: none; width: 2.7rem; height: 2.7rem;
+  display: grid; place-items: center;
+  border-radius: 8px;
+  background: var(--rouge); color: #fff;
+  font-size: 0.72rem; font-variation-settings: 'wght' 700; text-transform: uppercase;
+}
+.fichier__nom { font-variation-settings: 'wght' 600; }
+.fichier__meta { font-size: 0.85rem; color: var(--encre-2); }
+
+/* En-tête de page standard */
+.page-entete { display: grid; gap: 0.8rem; margin-top: 2.5rem; }
+.page-entete .intro { max-width: var(--mesure); color: var(--encre-2); font-size: 1.15rem; }
+.vide { color: var(--encre-2); }

@@ -1,0 +1,39 @@
+---
+import type { Evenement } from '../lib/sanity';
+import { jourNumero, moisCourt, quandEvenement } from '../lib/sanity';
+interface Props { evenement: Evenement; passe?: boolean; index?: number }
+const { evenement: ev, passe = false, index = 0 } = Astro.props;
+const href = ev.lien ?? (ev.article ? `/actualites/${ev.article.slug}` : null);
+const couleurs = ['rouge', 'orange', 'jaune', 'vert', 'bleu'];
+const teinte = couleurs[index % couleurs.length];
+---
+<li class:list={['ev', { 'ev--passe': passe }]} style={`--teinte: var(--${teinte})`}>
+  <time class="ev__date" datetime={ev.debut}>
+    <span class="ev__jour">{jourNumero(ev.debut)}</span>
+    <span class="ev__mois">{moisCourt(ev.debut)}</span>
+  </time>
+  <div class="ev__corps">
+    <p class="ev__titre">{href ? <a href={href}>{ev.titre}</a> : ev.titre}</p>
+    <p class="ev__quand">{quandEvenement(ev)}{ev.lieu && <>, {ev.lieu}</>}{ev.previsionnel && <span class="ev__etiquette"> · date à confirmer</span>}</p>
+    {ev.description && <p class="ev__desc">{ev.description}</p>}
+  </div>
+</li>
+
+<style>
+  .ev { display: grid; grid-template-columns: 3.6rem 1fr; gap: 1rem; align-items: start; }
+  .ev__date {
+    display: grid; justify-items: center; padding: 0.45rem 0 0.5rem;
+    border-radius: 10px; background: var(--teinte); color: #fff;
+    line-height: 1; transform: rotate(-3deg);
+    box-shadow: 0 3px 0 color-mix(in srgb, var(--teinte) 70%, black);
+  }
+  .ev__jour { font-family: var(--titre-police); font-size: 1.55rem; font-variation-settings: 'wght' 600; }
+  .ev__mois { font-size: 0.78rem; margin-top: 0.15rem; text-transform: lowercase; }
+  .ev--passe .ev__date { background: var(--papier-2); color: var(--encre-2); box-shadow: none; transform: none; }
+  .ev__titre { font-family: var(--titre-police); font-variation-settings: 'wght' 500; font-size: 1.15rem; line-height: 1.2; }
+  .ev__titre a { color: var(--encre); text-decoration-color: var(--teinte); text-decoration-thickness: 2px; }
+  .ev__quand { font-size: 0.92rem; color: var(--encre-2); margin-top: 0.2rem; }
+  .ev__quand::first-letter { text-transform: uppercase; }
+  .ev__desc { margin-top: 0.35rem; font-size: 0.95rem; }
+  .ev__etiquette { font-style: italic; }
+</style>

@@ -1,0 +1,7 @@
+---
+import type { Props as PtProps } from 'astro-portabletext/types';
+import Fichier from '../Fichier.astro';
+import type { SanityFile } from '../../lib/sanity';
+const { node } = Astro.props as PtProps<SanityFile & { _type: 'fichier' }>;
+---
+<Fichier fichier={node} />

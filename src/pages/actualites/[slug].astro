@@ -1,0 +1,52 @@
+---
+import Base from '../../layouts/Base.astro';
+import Prose from '../../components/Prose.astro';
+import Fichier from '../../components/Fichier.astro';
+import { getArticles, getArticle, urlFor, dateLongue } from '../../lib/sanity';
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((a) => ({ params: { slug: a.slug } }));
+}
+const { slug } = Astro.params;
+const article = await getArticle(slug!);
+if (!article) return Astro.redirect('/404');
+
+const image = article.image?.asset ? urlFor(article.image).width(1400).url() : undefined;
+const ogImage = article.image?.asset ? urlFor(article.image).width(1200).height(630).fit('crop').url() : undefined;
+const pj = (article.piecesJointes ?? []).filter((f) => f.asset?.url);
+---
+<Base titre={article.titre} description={article.resume} image={ogImage}>
+  <article class="container article">
+    <header class="article__entete">
+      <a class="retour" href="/actualites">Toutes les actualités</a>
+      <h1>{article.titre}</h1>
+      <time datetime={article.date} class="article__date">{dateLongue(article.date)}</time>
+      {article.resume && <p class="article__resume">{article.resume}</p>}
+    </header>
+    {image && (
+      <img class="article__image" src={image} alt={article.image?.alt ?? ''} width="1400" loading="eager" decoding="async" />
+    )}
+    <Prose value={article.corps} />
+    {pj.length > 0 && (
+      <section class="pj panneau" aria-labelledby="pj-titre">
+        <h2 id="pj-titre">Documents à télécharger</h2>
+        <ul class="pj__liste">
+          {pj.map((f) => <li><Fichier fichier={f} /></li>)}
+        </ul>
+      </section>
+    )}
+  </article>
+</Base>
+
+<style>
+  .article { margin-top: 2.5rem; display: grid; gap: 2rem; max-width: 52rem; }
+  .article__entete { display: grid; gap: 0.7rem; }
+  .retour { font-size: 0.95rem; justify-self: start; }
+  .article__date { color: var(--encre-2); }
+  .article__resume { font-size: 1.15rem; color: var(--encre-2); max-width: var(--mesure); }
+  .article__image { border-radius: var(--rayon); width: 100%; }
+  .pj { display: grid; gap: 1rem; padding: 1.5rem; max-width: var(--mesure); }
+  .pj h2 { font-size: 1.3rem; }
+  .pj__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
+</style>

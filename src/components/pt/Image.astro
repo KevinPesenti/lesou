@@ -1,0 +1,22 @@
+---
+import type { Props as PtProps } from 'astro-portabletext/types';
+import { urlFor } from '../../lib/sanity';
+type Node = { asset?: { _id: string; metadata?: { dimensions?: { width: number; height: number } } }; alt?: string; legende?: string };
+const { node } = Astro.props as PtProps<Node & { _type: 'image' }>;
+const dims = node.asset?.metadata?.dimensions;
+const largeur = 1200;
+const hauteur = dims ? Math.round((largeur * dims.height) / dims.width) : undefined;
+---
+{node.asset && (
+  <figure>
+    <img
+      src={urlFor(node).width(largeur).url()}
+      alt={node.alt ?? ''}
+      width={largeur}
+      height={hauteur}
+      loading="lazy"
+      decoding="async"
+    />
+    {node.legende && <figcaption>{node.legende}</figcaption>}
+  </figure>
+)}

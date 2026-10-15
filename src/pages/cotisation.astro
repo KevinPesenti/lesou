@@ -1,0 +1,122 @@
+---
+import Base from '../layouts/Base.astro';
+import { getParametres } from '../lib/sanity';
+const params = await getParametres();
+const c = params?.cotisation ?? {};
+const un = c.montantUnEnfant ?? 25;
+const suivant = c.montantParEnfantSuivant ?? 20;
+const annee = params?.anneeScolaire;
+const bulletin = c.bulletin?.asset?.url ? `${c.bulletin.asset.url}?dl=${encodeURIComponent(c.bulletin.asset.originalFilename ?? 'bulletin-cotisation.pdf')}` : null;
+const utilisations = c.utilisations ?? [];
+const couleurs = ['jaune', 'vert', 'bleu', 'rouge', 'orange'];
+const euros = (n: number) => `${n} €`;
+---
+<Base titre="Cotisation" description={`Cotiser au Sou des écoles de Boëge : ${euros(un)} pour un enfant, puis ${euros(suivant)} par enfant. En ligne sur HelloAsso ou par bulletin papier.`}>
+  <section class="haut">
+    <div class="container haut__contenu">
+      <p class="haut__sur">Cotisation{annee && ` ${annee}`}</p>
+      <h1 class="haut__titre">{c.accroche ?? 'L’école a besoin du Sou, le Sou a besoin de vous.'}</h1>
+      <p class="haut__texte">
+        Tout le monde ne peut pas venir donner un coup de main sur les événements, mais tout le monde peut cotiser.
+        C’est le geste le plus simple pour soutenir les projets des enfants.
+      </p>
+    </div>
+  </section>
+
+  <div class="container corps">
+    <section class="tarifs" aria-labelledby="tarifs-titre">
+      <h2 id="tarifs-titre" class="sr-only">Les tarifs</h2>
+      <div class="ticket panneau">
+        <span class="ticket__pour">Un enfant</span>
+        <span class="ticket__prix">{euros(un)}</span>
+        <span class="ticket__detail">pour l’année scolaire</span>
+      </div>
+      <div class="ticket panneau ticket--famille">
+        <span class="ticket__pour">Deux enfants et plus</span>
+        <span class="ticket__prix">{euros(suivant)} <small>par enfant</small></span>
+        <span class="ticket__detail">soit {euros(suivant * 2)} pour deux enfants, {euros(suivant * 3)} pour trois</span>
+      </div>
+    </section>
+
+    <section class="agir panneau" aria-labelledby="agir-titre">
+      <h2 id="agir-titre">Cotiser prend deux minutes</h2>
+      <div class="agir__boutons">
+        {params?.helloasso ? (
+          <a class="bouton bouton--rouge" href={params.helloasso} rel="noopener">Je cotise en ligne</a>
+        ) : (
+          <p class="vide">Le paiement en ligne sera bientôt disponible.</p>
+        )}
+        {bulletin && <a class="bouton bouton--clair" href={bulletin} download>Télécharger le bulletin papier</a>}
+      </div>
+      <p class="agir__note">
+        En ligne, le paiement passe par HelloAsso, la plateforme sécurisée des associations, sans frais pour le Sou.
+        Sur papier, remplissez le bulletin et déposez-le avec votre règlement en suivant les instructions indiquées.
+      </p>
+    </section>
+
+    <div class="deux">
+      {utilisations.length > 0 && (
+        <section class="usages" aria-labelledby="usages-titre">
+          <h2 id="usages-titre">À quoi sert votre cotisation</h2>
+          <ul class="usages__liste">
+            {utilisations.map((u, i) => (
+              <li style={`--teinte: var(--${couleurs[i % couleurs.length]})`}>{u}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {c.texte && (
+        <section class="mot" aria-labelledby="mot-titre">
+          <h2 id="mot-titre">Le mot du bureau</h2>
+          <p class="mot__texte">{c.texte}</p>
+        </section>
+      )}
+    </div>
+  </div>
+</Base>
+
+<style>
+  .haut {
+    background: var(--ardoise); color: var(--craie);
+    box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.22);
+  }
+  .haut__contenu {
+    padding: clamp(2.5rem, 6vw, 4.5rem) var(--gouttiere);
+    max-width: 44rem; margin-inline: auto; text-align: center;
+    display: grid; gap: 0.9rem; justify-items: center;
+  }
+  .haut__sur { font-family: var(--craie-police); font-weight: 600; font-size: 1.6rem; color: var(--craie-sombre); }
+  .haut__titre { font-size: clamp(1.9rem, 1.3rem + 2.6vw, 3.2rem); color: var(--craie); }
+  .haut__texte { color: var(--craie-sombre); max-width: 46ch; font-size: 1.1rem; }
+
+  .corps { display: grid; gap: 2.5rem; margin-top: -2rem; }
+  .tarifs { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .ticket {
+    display: grid; gap: 0.2rem; justify-items: center; text-align: center;
+    padding: 1.75rem 1.5rem 1.6rem;
+    border-top: 6px solid var(--jaune);
+  }
+  .ticket--famille { border-top-color: var(--bleu); }
+  .ticket__pour { font-family: var(--titre-police); font-variation-settings: 'wght' 500; font-size: 1.15rem; color: var(--encre-2); }
+  .ticket__prix { font-family: var(--titre-police); font-variation-settings: 'wght' 600; font-size: 3.2rem; line-height: 1.05; color: var(--ardoise); }
+  .ticket__prix small { font-size: 1.1rem; font-variation-settings: 'wght' 500; color: var(--encre-2); }
+  .ticket__detail { color: var(--encre-2); font-size: 0.95rem; }
+
+  .agir { padding: 2rem; display: grid; gap: 1.2rem; justify-items: center; text-align: center; }
+  .agir__boutons { display: flex; flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
+  .agir__note { color: var(--encre-2); max-width: 56ch; font-size: 0.98rem; }
+
+  .deux { display: grid; gap: 2.5rem; }
+  @media (min-width: 52em) { .deux { grid-template-columns: 1fr 1fr; gap: 3rem; } }
+  .usages { display: grid; gap: 1rem; align-content: start; }
+  .usages__liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+  .usages__liste li {
+    position: relative; padding-left: 2.1rem; font-size: 1.05rem;
+  }
+  .usages__liste li::before {
+    content: ''; position: absolute; left: 0; top: 0.2em;
+    width: 1.25rem; height: 1.25rem; border-radius: 50%; background: var(--teinte);
+  }
+  .mot { display: grid; gap: 1rem; align-content: start; }
+  .mot__texte { max-width: 48ch; font-size: 1.05rem; }
+</style>

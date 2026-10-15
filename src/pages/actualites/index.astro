@@ -1,0 +1,39 @@
+---
+import Base from '../../layouts/Base.astro';
+import CarteArticle from '../../components/CarteArticle.astro';
+import { getArticles } from '../../lib/sanity';
+const articles = await getArticles();
+const parAnnee = new Map<string, typeof articles>();
+for (const a of articles) {
+  const annee = new Date(a.date).getFullYear().toString();
+  parAnnee.set(annee, [...(parAnnee.get(annee) ?? []), a]);
+}
+---
+<Base titre="Actualités" description="Toutes les nouvelles du Sou des écoles de Boëge : fêtes, ventes, sorties et projets.">
+  <div class="container page">
+    <h1>Actualités</h1>
+    {articles.length === 0 && <p class="vide">Aucun article pour le moment.</p>}
+    {[...parAnnee.entries()].map(([annee, liste]) => (
+      <section class="annee" aria-labelledby={`annee-${annee}`}>
+        <h2 id={`annee-${annee}`} class="annee__titre">{annee}</h2>
+        <div class="grille">
+          {liste.map((a) => <CarteArticle article={a} />)}
+        </div>
+      </section>
+    ))}
+  </div>
+</Base>
+
+<style>
+  .page { margin-top: 2.5rem; display: grid; gap: 2.5rem; }
+  .annee { display: grid; gap: 1.5rem; }
+  .annee__titre {
+    font-size: 1.1rem; color: var(--encre-2);
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--ligne);
+  }
+  .grille {
+    display: grid; gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  }
+  .vide { color: var(--encre-2); }
+</style>

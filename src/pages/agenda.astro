@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import CarteEvenement from '../components/CarteEvenement.astro';
+import LigneEvenement from '../components/LigneEvenement.astro';
+import { getEvenementsAVenir, getEvenementsPasses, getParametres, debutAnneeScolaire } from '../lib/sanity';
+const [aVenir, passes, params] = await Promise.all([getEvenementsAVenir(), getEvenementsPasses(debutAnneeScolaire()), getParametres()]);
+const annee = params?.anneeScolaire;
+const [prochain, ...suivants] = aVenir;
+---
+<Base titre="Agenda" description="Les dates à retenir du Sou des écoles de Boëge.">
+  <div class="container page">
+    <header class="entete">
+      <h1>Agenda{annee && <span class="page__annee"> {annee}</span>}</h1>
+      <p class="intro">Toutes les dates de l’année. Les événements marqués « date à confirmer » seront précisés dans les actualités.</p>
+      <div class="abonner">
+        <a class="bouton bouton--clair" href="/agenda.ics" download>Ajouter toutes les dates à mon calendrier</a>
+        <p class="abonner__aide">
+          Pour un agenda qui se met à jour tout seul, abonnez-vous à l’adresse
+          <code>{new URL('/agenda.ics', Astro.site).href}</code> dans Google Agenda (« Autres agendas », « À partir de l’URL ») ou dans le calendrier de votre téléphone.
+        </p>
+      </div>
+    </header>
+
+    <section class="bloc" aria-labelledby="avenir">
+      <h2 id="avenir" class="visually-hidden">À venir</h2>
+      {prochain ? (
+        <ul class="cartes">
+          <CarteEvenement evenement={prochain} index={0} />
+          {suivants.map((ev, i) => <CarteEvenement evenement={ev} index={i + 1} />)}
+        </ul>
+      ) : (
+        <p class="vide">Rien de prévu pour l’instant. Les prochaines dates seront annoncées ici et sur le groupe WhatsApp des parents.</p>
+      )}
+    </section>
+
+    {passes.length > 0 && (
+      <section class="bloc bloc--passe" aria-labelledby="passes">
+        <h2 id="passes">Déjà passé cette année</h2>
+        <ul class="liste">{passes.map((ev, i) => <LigneEvenement evenement={ev} passe index={i} />)}</ul>
+      </section>
+    )}
+  </div>
+</Base>
+
+<style>
+  .page { margin-top: 2.5rem; display: grid; gap: 2.5rem; }
+  .entete { display: grid; gap: 0.6rem; }
+  .intro { max-width: var(--mesure); color: var(--encre-2); font-size: 1.1rem; }
+  .page__annee { color: var(--encre-2); font-variation-settings: 'wght' 400; }
+  .abonner { display: grid; gap: 0.6rem; justify-items: start; margin-top: 0.4rem; }
+  .abonner__aide { font-size: 0.9rem; color: var(--encre-2); max-width: var(--mesure); }
+  .abonner__aide code { font-family: inherit; background: var(--papier-2); padding: 0.05em 0.4em; border-radius: 4px; user-select: all; }
+  .bloc { display: grid; gap: 1.2rem; }
+  .cartes {
+    list-style: none; margin: 0; padding: 0.9rem 0 0;
+    display: grid; gap: 1.8rem 1.4rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+  .bloc--passe { max-width: 46rem; padding-top: 1.5rem; border-top: 3px dotted var(--ligne); }
+  .liste { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.2rem; }
+  .vide { color: var(--encre-2); }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>

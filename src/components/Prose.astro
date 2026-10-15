@@ -1,0 +1,16 @@
+---
+import { PortableText } from 'astro-portabletext';
+import Image from './pt/Image.astro';
+import Fichier from './pt/Fichier.astro';
+import Lien from './pt/Lien.astro';
+import Faq from './pt/Faq.astro';
+import Galerie from './pt/Galerie.astro';
+interface Props { value?: unknown[] }
+const { value } = Astro.props;
+const components = { type: { image: Image, fichier: Fichier, faq: Faq, galerie: Galerie }, mark: { link: Lien } };
+---
+{value && value.length > 0 && (
+  <div class="prose">
+    <PortableText value={value as any} components={components} onMissingComponent={false} />
+  </div>
+)}

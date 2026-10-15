@@ -1,0 +1,53 @@
+---
+import type { Parametres } from '../lib/sanity';
+interface Props { nom: string; params: Parametres | null }
+const { nom, params } = Astro.props;
+const annee = new Date().getFullYear();
+---
+<footer class="pied">
+  <div class="pied__arc" aria-hidden="true"></div>
+  <div class="container pied__grille">
+    <div>
+      <img class="pied__logo" src="/logo.png" alt="" width="64" height="64" loading="lazy" />
+      <p class="craie pied__nom">{nom}</p>
+      {params?.description && <p class="pied__desc">{params.description}</p>}
+    </div>
+    <div class="pied__col">
+      <p class="pied__titre">Nous contacter</p>
+      {params?.email && <a href={`mailto:${params.email}`}>{params.email}</a>}
+      {params?.adresse && <p class="pied__adresse">{params.adresse}</p>}
+    </div>
+    <div class="pied__col">
+      <p class="pied__titre">Participer</p>
+      <a href="/cotisation">Cotiser pour l’année</a>
+      {params?.facebook && <a href={params.facebook} rel="noopener">Page Facebook</a>}
+      <a href="/rss.xml">Flux RSS des actualités</a>
+    </div>
+  </div>
+  <div class="container pied__bas">
+    <span>© {annee} {nom}</span>
+    <a href="/mentions-legales">Mentions légales</a>
+    <a href="/admin">Espace bureau</a>
+  </div>
+</footer>
+
+<style>
+  .pied { margin-top: 5rem; background: var(--ardoise-sombre); color: var(--craie-sombre); }
+  .pied__arc { height: 5px; background: var(--arc); }
+  .pied a { color: var(--craie); }
+  .pied__grille {
+    display: grid; gap: 2rem; padding: 3rem 0 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+  .pied__logo { width: 64px; height: 64px; border-radius: 50%; margin-bottom: 0.8rem; background: var(--craie); }
+  .pied__nom { font-size: 1.9rem; line-height: 1.1; }
+  .pied__desc { margin-top: 0.6rem; max-width: 34ch; }
+  .pied__col { display: flex; flex-direction: column; gap: 0.45rem; align-items: flex-start; }
+  .pied__titre { color: var(--craie); font-family: var(--titre-police); font-variation-settings: 'wght' 500; font-size: 1.1rem; margin-bottom: 0.2rem; }
+  .pied__adresse { white-space: pre-line; }
+  .pied__bas {
+    display: flex; flex-wrap: wrap; gap: 1.2rem;
+    padding: 1.2rem 0 1.6rem; font-size: 0.9rem;
+    border-top: 1px solid rgba(246, 241, 230, 0.15);
+  }
+</style>

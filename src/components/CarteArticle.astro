@@ -1,0 +1,45 @@
+---
+import type { ArticleCard } from '../lib/sanity';
+import { urlFor, dateLongue } from '../lib/sanity';
+interface Props { article: ArticleCard; niveau?: 'h2' | 'h3'; grande?: boolean }
+const { article, niveau = 'h3', grande = false } = Astro.props;
+const Titre = niveau;
+const href = `/actualites/${article.slug}`;
+const img = article.image?.asset ? urlFor(article.image).width(grande ? 1200 : 720).height(grande ? 800 : 480).fit('crop').url() : null;
+---
+<article class:list={['carte', 'panneau', { 'carte--grande': grande }]}>
+  <a class="carte__visuel" href={href} tabindex="-1" aria-hidden="true">
+    {img ? (
+      <img src={img} alt="" width={grande ? 1200 : 720} height={grande ? 800 : 480} loading="lazy" decoding="async" />
+    ) : (
+      <span class="carte__vide"><img src="/logo.png" alt="" width="200" height="200" loading="lazy" /></span>
+    )}
+  </a>
+  <div class="carte__texte">
+    <time class="carte__date" datetime={article.date}>{dateLongue(article.date)}</time>
+    <Titre class="carte__titre"><a href={href}>{article.titre}</a></Titre>
+    {article.resume && <p class="carte__resume">{article.resume}</p>}
+  </div>
+</article>
+
+<style>
+  .carte { display: grid; grid-template-rows: auto 1fr; align-content: start; overflow: hidden; transition: transform 150ms ease, box-shadow 150ms ease; }
+  .carte:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(36, 48, 44, 0.06), 0 16px 32px -14px rgba(36, 48, 44, 0.3); }
+  .carte__visuel { display: block; aspect-ratio: 3 / 2; overflow: hidden; background: var(--papier-2); }
+  .carte__visuel img { width: 100%; height: 100%; object-fit: cover; }
+  .carte__vide { display: grid; place-items: center; height: 100%; }
+  .carte__vide img { width: 38%; max-width: 150px; height: auto; border-radius: 50%; opacity: 0.85; }
+  .carte__texte { display: grid; gap: 0.35rem; align-content: start; padding: 1rem 1.15rem 1.25rem; }
+  .carte__date { font-size: 0.88rem; color: var(--encre-2); }
+  .carte__titre { font-size: 1.2rem; }
+  .carte__titre a { color: var(--encre); text-decoration: none; }
+  .carte__titre a:hover { text-decoration: underline; text-decoration-color: var(--jaune); text-decoration-thickness: 3px; }
+  .carte__resume { color: var(--encre-2); font-size: 0.98rem; }
+  @media (min-width: 40em) {
+    .carte--grande { grid-template-columns: 5fr 4fr; }
+    .carte--grande .carte__visuel { aspect-ratio: auto; min-height: 18rem; }
+    .carte--grande .carte__texte { padding: 1.5rem 1.6rem; align-content: center; gap: 0.6rem; }
+    .carte--grande .carte__titre { font-size: 1.6rem; }
+    .carte--grande .carte__resume { font-size: 1.05rem; }
+  }
+</style>
