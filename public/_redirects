@@ -1,0 +1,3 @@
+# Le Studio Sanity (/admin) gère ses propres adresses côté navigateur :
+# un rafraîchissement sur /admin/structure/... doit recharger la même page.
+/admin/* /admin 200

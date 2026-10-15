@@ -6,6 +6,8 @@
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": "./dist",
+    // Le site est bâti sans barre finale (trailingSlash: never) : /agenda sert agenda/index.html
+    "html_handling": "drop-trailing-slash",
     // Sert dist/404.html pour les adresses inconnues
     "not_found_handling": "404-page"
   },
