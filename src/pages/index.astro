@@ -6,6 +6,9 @@ import LigneEvenement from '../components/LigneEvenement.astro';
 import { getArticles, getEvenementsAVenir, getParametres, debutAnneeScolaire, anneeScolaireDe } from '../lib/sanity';
 
 const [articles, evenements, params] = await Promise.all([getArticles(7), getEvenementsAVenir(5), getParametres()]);
+// Rendez-vous du tableau : celui choisi dans les paramètres s'il est encore à venir, sinon le prochain de l'agenda
+const choisi = params?.rendezVous;
+const misEnAvant = choisi && new Date(choisi.fin ?? choisi.debut) >= new Date() ? choisi : evenements[0] ?? null;
 
 // Les articles de l'année scolaire en cours d'abord ; ceux de l'an dernier
 // suivent sous un titre « Souvenirs de … ». Les plus vieux restent sur /actualites.
@@ -16,7 +19,7 @@ const [premier, ...autres] = cetteAnnee.length ? cetteAnnee : articles;
 const souvenirs = cetteAnnee.length ? articles.filter((a) => anneeScolaireDe(a.date) === anneePrecedente) : [];
 ---
 <Base>
-  <Tableau evenement={evenements[0] ?? null} params={params} />
+  <Tableau evenement={misEnAvant} params={params} />
 
   <div class="container accueil">
     <section class="actus" aria-labelledby="actus-titre">

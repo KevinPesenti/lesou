@@ -20,6 +20,13 @@ export const parametres = defineType({
       rows: 3,
     }),
     defineField({
+      name: 'rendezVous',
+      title: 'Rendez-vous mis en avant sur l’accueil',
+      description: 'Par défaut, l’accueil affiche le prochain événement de l’agenda. Choisissez-en un ici pour le mettre en avant à la place (ignoré une fois la date passée).',
+      type: 'reference',
+      to: [{ type: 'evenement' }],
+    }),
+    defineField({
       name: 'annonce',
       title: 'Bandeau d’annonce',
       description: 'Un mot affiché en haut de toutes les pages tant que la case « Afficher » est cochée : annulation, report, rappel important.',

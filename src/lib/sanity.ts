@@ -43,6 +43,7 @@ export interface Annonce { actif?: boolean; texte?: string; ton?: 'info' | 'aler
 export interface Parametres {
   nom?: string;
   annonce?: Annonce;
+  rendezVous?: Evenement | null;
   cotisation?: Cotisation;
   accroche?: string;
   description?: string;
@@ -94,9 +95,13 @@ const CORPS = `corps[]{
   _type == "galerie" => { ..., images[] ${IMAGE} }
 }`;
 
+const EVENEMENT = `_id, titre, debut, fin, lieu, previsionnel, description, lien, article->{ titre, "slug": slug.current }`;
+
 /* ---------- Requêtes ---------- */
 export const getParametres = () =>
-  client.fetch<Parametres | null>(`*[_type == "parametres"][0]{ ..., cotisation{ ..., bulletin ${FILE} } }`);
+  client.fetch<Parametres | null>(
+    `*[_type == "parametres"][0]{ ..., cotisation{ ..., bulletin ${FILE} }, rendezVous->{ ${EVENEMENT} } }`,
+  );
 
 export const getContacts = () =>
   client.fetch<ContactUtile[]>(`*[_type == "contactUtile"] | order(ordre asc, nom asc){ _id, nom, sousTitre, icone, telephones, email, site, adresse, horaires }`);
@@ -126,14 +131,14 @@ export const getPages = () =>
 export const getEvenementsAVenir = (limit?: number) =>
   client.fetch<Evenement[]>(
     `*[_type == "evenement" && coalesce(fin, debut) >= now()] | order(debut asc) ${limit ? `[0...${limit}]` : ''}{
-      _id, titre, debut, fin, lieu, previsionnel, description, lien, article->{ titre, "slug": slug.current }
+      ${EVENEMENT}
     }`,
   );
 
 export const getEvenementsPasses = (depuis: string) =>
   client.fetch<Evenement[]>(
     `*[_type == "evenement" && coalesce(fin, debut) < now() && debut >= $depuis] | order(debut desc){
-      _id, titre, debut, fin, lieu, previsionnel, description, lien, article->{ titre, "slug": slug.current }
+      ${EVENEMENT}
     }`,
     { depuis },
   );
